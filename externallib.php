@@ -67,6 +67,13 @@ class local_mae_external extends external_api {
         require_once("$CFG->dirroot/group/lib.php");
 
         require_capability('mod/mae:impersonate', context_system::instance());
+
+        if ($CFG->version > 2018051718) {
+            throw new moodle_exception('Moodle version ' . $CFG->version . ' not compatible.');
+        }
+        if ($CFG->version < 2018050800) {
+            throw new moodle_exception('Moodle version ' . $CFG->version . ' too old.');
+        }
         
         $params = self::validate_parameters(self::impersonate_parameters(), array('scorm_student_id'=>$scorm_student_id));
         $serviceshortname  = 'moodle_mobile_app';
