@@ -175,15 +175,18 @@ class local_mae_external extends external_api {
                 'type' => new external_value(PARAM_TEXT, 'unit | tutorial'),
                 'level' => new external_value(PARAM_INT, 'level number'),
                 'unit' => new external_value(PARAM_INT, 'unit number'),
+                'username' => new external_value(PARAM_TEXT, 'username', VALUE_DEFAULT, 'all'),
             )
         );
     }
 
     public static function find_scoid_returns() {
-        return  new external_single_structure(
-            array(
-                'scormid' => new external_value(PARAM_RAW, 'scormid'),
-                'scoid' => new external_value(PARAM_RAW, 'scoid'),
+        return  new external_multiple_structure(
+	    new external_single_structure(
+                array(
+                    'scormid' => new external_value(PARAM_RAW, 'scormid'),
+                    'scoid' => new external_value(PARAM_RAW, 'scoid'),
+                )
             )
         );
     }
@@ -194,7 +197,7 @@ class local_mae_external extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function find_scoid($type, $level, $unit) { //Don't forget to set it as static
+    public static function find_scoid($type, $level, $unit, $username='') { //Don't forget to set it as static
         global $CFG, $DB;
         require_once("$CFG->dirroot/group/lib.php");
         $un = ($type=='unit')?"un":"tu";
@@ -202,16 +205,31 @@ class local_mae_external extends external_api {
         $level = (int) $level;
         $unit = (int) $unit;
         $quest = '_';
-        $sql = "SELECT *
-        FROM {scorm_scoes}
-        WHERE launch like '${type}.html${quest}ni=${level}&$un=${unit}&%'";
+        //$username = $username;
+	if ($username <> 'all') {
+		$sql = "select * from {user} us 
+			inner join {role_assignments} ra on ra.userid=us.id
+ 			inner join {context} ctx on ctx.id=ra.contextid
+ 			inner join {course} course on course.id=ctx.instanceid
+ 			inner join {scorm} scorm on course.id=scorm.course
+ 			inner join {scorm_scoes} scoes on scoes.scorm=scorm.id
+			WHERE 
+ 			us.username='${username}' 
+			and scoes.launch like '${type}.html${quest}ni=${level}&$un=${unit}&%'";
+	} else {
+ 	       $sql = "SELECT *
+ 	       FROM {scorm_scoes}
+ 	       WHERE launch like '${type}.html${quest}ni=${level}&$un=${unit}&%'";
+	}
         $rs = $DB->get_recordset_sql($sql);
+	$responses = [];
         foreach ($rs as $sco) {
             $response['scoid'] = $sco->id;
             $response['scormid'] = $sco->scorm;
+	    $responses[] = $response;
         }
 
-        return $response;
+        return $responses;
 
     }
 
