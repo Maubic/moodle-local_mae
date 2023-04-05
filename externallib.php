@@ -68,7 +68,7 @@ class local_mae_external extends external_api {
 
         require_capability('mod/mae:impersonate', context_system::instance());
 
-        if ($CFG->version > 2020061513) {
+        if ($CFG->version > 2022112803) { // 2022112802
             throw new moodle_exception('Moodle version ' . $CFG->version . ' not compatible.');
         }
         if ($CFG->version < 2018050800) {
