@@ -10,7 +10,6 @@
   $services = array(
     'maeservice' => array(                                                // the name of the web service
         'functions' => array ('local_mae_impersonate', 'local_mae_find_scoid'), // web service functions of this service
-        // local_mae is a local plugin, so its capability must use the local component name.
         'requiredcapability' => 'local/mae:impersonate',                // if set, the web service user need this capability to access
                                                                             // any function of this service. For example: 'some/capability:specified'                 
         'restrictedusers' => 0,                                             // if enabled, the Moodle administrator must link some user to this service
