@@ -8,15 +8,17 @@
  */
 
 $capabilities = array(
-    'mod/mae:impersonate' => array(
+    'local/mae:impersonate' => array(
         'riskbitmask'  => RISK_SPAM | RISK_PERSONAL | RISK_XSS | RISK_CONFIG,
         'captype'      => 'read',
-        'contextlevel' => CONTEXT_MODULE,
+        // The web service impersonation works at site scope and is checked with context_system,
+        // so the capability must also live at the system context level for consistency.
+        'contextlevel' => CONTEXT_SYSTEM,
         'archetypes'   => array(
             'student'        => CAP_DENY,
             'teacher'        => CAP_DENY,
             'editingteacher' => CAP_DENY,
-            'manager'          => CAP_ALLOW
+            'manager'        => CAP_ALLOW
         )
     )
-        );
+);

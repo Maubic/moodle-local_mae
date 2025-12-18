@@ -10,7 +10,8 @@
   $services = array(
     'maeservice' => array(                                                // the name of the web service
         'functions' => array ('local_mae_impersonate', 'local_mae_find_scoid'), // web service functions of this service
-        'requiredcapability' => 'mod/mae:impersonate',                // if set, the web service user need this capability to access 
+        // local_mae is a local plugin, so its capability must use the local component name.
+        'requiredcapability' => 'local/mae:impersonate',                // if set, the web service user need this capability to access
                                                                             // any function of this service. For example: 'some/capability:specified'                 
         'restrictedusers' => 0,                                             // if enabled, the Moodle administrator must link some user to this service
                                                                             // into the administration
@@ -31,7 +32,7 @@ $functions = array(
         'type'        => 'write',                  //database rights of the web service function (read, write)
         'ajax' => true,        // is the service available to 'internal' ajax calls. 
         'services' => array('maeservice'),    // Optional, only available for Moodle 3.1 onwards. List of built-in services (by shortname) where the function will be included.  Services created manually via the Moodle interface are not supported.
-        'capabilities' => 'mod/mae:impersonate', // comma separated list of capabilities used by the function.
+        'capabilities' => 'local/mae:impersonate', // comma separated list of capabilities used by the function.
     ),
     'local_mae_find_scoid' => array(         //web service function name
         'classname'   => 'local_mae_external',  //class containing the external function OR namespaced class in classes/external/XXXX.php
@@ -42,6 +43,6 @@ $functions = array(
         'type'        => 'write',                  //database rights of the web service function (read, write)
         'ajax' => true,        // is the service available to 'internal' ajax calls. 
         'services' => array('maeservice'),    // Optional, only available for Moodle 3.1 onwards. List of built-in services (by shortname) where the function will be included.  Services created manually via the Moodle interface are not supported.
-        'capabilities' => 'mod/mae:impersonate', // comma separated list of capabilities used by the function.
+        'capabilities' => 'local/mae:impersonate', // comma separated list of capabilities used by the function.
     ),    
 );

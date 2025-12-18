@@ -66,12 +66,20 @@ class local_mae_external extends external_api {
         global $CFG, $DB;
         require_once("$CFG->dirroot/group/lib.php");
 
-        require_capability('mod/mae:impersonate', context_system::instance());
-
-        if ($CFG->version > 2022112803) { // 2022112802
-            throw new moodle_exception('Moodle version ' . $CFG->version . ' not compatible.');
+        // This is a local plugin with site-wide web service calls, so permissions are checked at
+        // system context. Accept the legacy mod/ capability as a fallback so existing installations
+        // do not need to be reconfigured after the capability was renamed to local/mae:impersonate.
+        $systemcontext = context_system::instance();
+        if (has_capability('local/mae:impersonate', $systemcontext)) {
+            require_capability('local/mae:impersonate', $systemcontext);
+        } else {
+            require_capability('mod/mae:impersonate', $systemcontext);
         }
-        if ($CFG->version < 2018050800) {
+
+        if ((int)$CFG->branch >= 500) {
+            throw new moodle_exception('Moodle branch ' . $CFG->branch . ' not compatible.');
+        }
+        if ($CFG->version < 2020061504) {
             throw new moodle_exception('Moodle version ' . $CFG->version . ' too old.');
         }
         
@@ -86,8 +94,6 @@ class local_mae_external extends external_api {
             throw new moodle_exception('restoredaccountresetpassword', 'webservice');
         }
         
-        $systemcontext = context_system::instance();
-
         require_once("$CFG->libdir/authlib.php");
 
         if ($user = get_complete_user_data('username', $username, $CFG->mnet_localhost_id)) {
@@ -205,23 +211,25 @@ class local_mae_external extends external_api {
         $level = (int) $level;
         $unit = (int) $unit;
         $quest = '_';
-        //$username = $username;
-	if ($username <> 'all') {
-		$sql = "select * from {user} us 
-			inner join {role_assignments} ra on ra.userid=us.id
- 			inner join {context} ctx on ctx.id=ra.contextid
- 			inner join {course} course on course.id=ctx.instanceid
- 			inner join {scorm} scorm on course.id=scorm.course
- 			inner join {scorm_scoes} scoes on scoes.scorm=scorm.id
-			WHERE 
- 			us.username='${username}' 
-			and scoes.launch like '${type}.html${quest}ni=${level}&$un=${unit}&%'";
-	} else {
- 	       $sql = "SELECT *
- 	       FROM {scorm_scoes}
- 	       WHERE launch like '${type}.html${quest}ni=${level}&$un=${unit}&%'";
-	}
-        $rs = $DB->get_recordset_sql($sql);
+        $launchpattern = "{$type}.html{$quest}ni={$level}&{$un}={$unit}&%";
+        if ($username <> 'all') {
+                $sql = "select * from {user} us
+                        inner join {role_assignments} ra on ra.userid=us.id
+                        inner join {context} ctx on ctx.id=ra.contextid
+                        inner join {course} course on course.id=ctx.instanceid
+                        inner join {scorm} scorm on course.id=scorm.course
+                        inner join {scorm_scoes} scoes on scoes.scorm=scorm.id
+                        WHERE
+                        us.username = :username
+                        and scoes.launch like :launchpattern";
+                $params = ['username' => $username, 'launchpattern' => $launchpattern];
+        } else {
+               $sql = "SELECT *
+               FROM {scorm_scoes}
+               WHERE launch like :launchpattern";
+               $params = ['launchpattern' => $launchpattern];
+        }
+        $rs = $DB->get_recordset_sql($sql, $params);
 	$responses = [];
         foreach ($rs as $sco) {
             $response['scoid'] = $sco->id;
