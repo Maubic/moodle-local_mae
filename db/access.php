@@ -8,15 +8,16 @@
  */
 
 $capabilities = array(
-    'mod/mae:impersonate' => array(
+    'local/mae:impersonate' => array(
         'riskbitmask'  => RISK_SPAM | RISK_PERSONAL | RISK_XSS | RISK_CONFIG,
         'captype'      => 'read',
-        'contextlevel' => CONTEXT_MODULE,
+        'contextlevel' => CONTEXT_SYSTEM,
         'archetypes'   => array(
-            'student'        => CAP_DENY,
-            'teacher'        => CAP_DENY,
-            'editingteacher' => CAP_DENY,
-            'manager'          => CAP_ALLOW
+            // Explicitly prohibit the capability for teaching and student roles.
+            'student'        => CAP_PROHIBIT,
+            'teacher'        => CAP_PROHIBIT,
+            'editingteacher' => CAP_PROHIBIT,
+            'manager'        => CAP_ALLOW
         )
     )
-        );
+);
