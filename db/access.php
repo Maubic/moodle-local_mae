@@ -15,9 +15,10 @@ $capabilities = array(
         // so the capability must also live at the system context level for consistency.
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes'   => array(
-            'student'        => CAP_DENY,
-            'teacher'        => CAP_DENY,
-            'editingteacher' => CAP_DENY,
+            // Explicitly prohibit the capability for teaching and student roles.
+            'student'        => CAP_PROHIBIT,
+            'teacher'        => CAP_PROHIBIT,
+            'editingteacher' => CAP_PROHIBIT,
             'manager'        => CAP_ALLOW
         )
     )
